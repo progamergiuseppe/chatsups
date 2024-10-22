@@ -1,0 +1,77 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f4ff;
+  margin: 0;
+  padding: 20px;
+}
+
+.chat-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 500px;
+  margin: auto;
+}
+
+h1 {
+  text-align: center;
+  color: #007bff;
+}
+
+.section {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.section.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#username, #room, #message {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #007bff;
+  border-radius: 5px;
+}
+
+#join, #send, #clear-chat {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#join:hover, #send:hover, #clear-chat:hover {
+  background-color: #0056b3;
+}
+
+#messages {
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  height: 300px;
+  overflow-y: scroll;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+#messages div {
+  margin: 5px 0;
+}
+
+.message-time {
+  font-size: 0.8em; /* Smaller font size */
+  color: #666; /* A lighter color for the time */
+  margin-left: 5px; /* Spacing between message and time */
+}
+
+strong {
+  color: #007bff;
+}

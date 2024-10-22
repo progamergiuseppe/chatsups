@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4ff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 500px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+
+        .section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .section.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #username,
+        #room,
+        #message {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+        }
+
+        #join,
+        #send,
+        #clear-chat {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #join:hover,
+        #send:hover,
+        #clear-chat:hover {
+            background-color: #0056b3;
+        }
+
+        #messages {
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        #messages div {
+            margin: 5px 0;
+        }
+
+        .message-time {
+            font-size: 0.8em;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        strong {
+            color: #007bff;
+        }
+
+        #error-message {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div id="login-section" class="section active">
+            <h1>Chat Room</h1>
+            <input id="username" placeholder="Set your username" />
+            <input id="room" placeholder="Room name" />
+            <button id="join">Join Room</button>
+            <div id="error-message"></div>
+        </div>
+
+        <div id="chat-section" class="section" style="display: none;">
+            <h2 id="room-name" style="text-align: center; color: #007bff;"></h2>
+            <h3 id="user-count" style="text-align: center; color: #007bff;"></h3>
+            <div id="messages"></div>
+            <input id="message" placeholder="Type your message" />
+            <button id="send">Send</button>
+            <button id="clear-chat">Clear Chat</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        document.getElementById("join").addEventListener("click", () => {
+            const room = document.getElementById("room").value.trim();
+            const username = document.getElementById("username").value.trim();
+            const errorMessage = document.getElementById("error-message");
+
+            if (room && username) {
+                errorMessage.textContent = ""; // Clear previous error messages
+                socket.emit("joinRoom", { room, username });
+                document.getElementById("room-name").textContent = `Room: ${room}`;
+                document.getElementById("login-section").classList.remove("active");
+                document.getElementById("chat-section").style.display = "block";
+                setTimeout(() => {
+                    document.getElementById("chat-section").classList.add("active");
+                }, 10);
+            } else {
+                errorMessage.textContent = "Please enter both a username and a room name.";
+            }
+        });
+
+        document.getElementById("send").addEventListener("click", () => {
+            const room = document.getElementById("room").value;
+            const message = document.getElementById("message").value.trim();
+
+            if (message) {
+                const username = document.getElementById("username").value;
+                socket.emit("chatMessage", { room, message, username });
+                document.getElementById("message").value = "";
+            }
+        });
+
+        document.getElementById("clear-chat").addEventListener("click", () => {
+            document.getElementById("messages").innerHTML = "";
+        });
+
+        socket.on("message", (data) => {
+            const messages = document.getElementById("messages");
+            messages.innerHTML += `
+                <div>
+                    <strong>${data.username}:</strong> ${data.message} 
+                    <span class="message-time">${data.time}</span>
+                </div>`;
+            messages.scrollTop = messages.scrollHeight;
+        });
+
+        socket.on("userCount", (count) => {
+            const userCountDisplay = document.getElementById("user-count");
+            userCountDisplay.textContent = `Users in room: ${count}`;
+        });
+
+        socket.on("connect_error", (error) => {
+            const errorMessage = document.getElementById("error-message");
+            errorMessage.textContent = "Connection error. Please try again.";
+            console.error("Connection error:", error);
+        });
+    </script>
+</body>
+
+</html>
